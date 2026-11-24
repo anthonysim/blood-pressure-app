@@ -1,0 +1,22 @@
+# Local Postgres for development. Start: npm run db:up · Stop: npm run db:down
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: bp-tracker-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bp_tracker
+    ports:
+      - "54329:5432"
+    volumes:
+      - bp-tracker-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bp_tracker"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  bp-tracker-data:

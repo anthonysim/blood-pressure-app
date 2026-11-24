@@ -10,31 +10,27 @@ Track blood pressure morning, noon and night. Each user signs up with email + pa
 
 ## Stack
 
-Next.js 16 (App Router, Cache Components) · React 19 · Neon Postgres · Drizzle ORM · Better Auth · Recharts · Tailwind + shadcn/ui
+Next.js 16 (App Router, Cache Components) · React 19 · Postgres (Docker locally, Neon in production) · Drizzle ORM · Better Auth · Recharts · Tailwind + shadcn/ui
 
-## Setup
+## Local setup
 
-1. **Create a Neon database** at [neon.tech](https://neon.tech) (free tier is fine) and copy the **pooled** connection string.
-2. **Configure env**:
-   ```bash
-   cp .env.example .env.local
-   # paste DATABASE_URL, then:
-   echo "BETTER_AUTH_SECRET=$(openssl rand -base64 32)" >> .env.local
-   ```
-3. **Install and migrate**:
-   ```bash
-   npm install
-   npm run db:migrate
-   ```
-4. **Run**:
-   ```bash
-   npm run dev
-   ```
-   Open http://localhost:3000 and create an account.
-5. **Optional sample data** (after signing up):
-   ```bash
-   npm run db:seed -- you@example.com
-   ```
+Needs Docker (Docker Desktop or OrbStack). Postgres runs in a container on port **54329**.
+
+```bash
+npm install
+cp .env.example .env.local   # defaults already point at the local database
+npm run db:up                # start Postgres in Docker
+npm run db:migrate           # create tables
+npm run dev                  # http://localhost:3000
+```
+
+Create an account in the app, then optionally load ~60 days of sample readings:
+
+```bash
+npm run db:seed -- you@example.com
+```
+
+`npm run db:down` stops the database (data is kept). `npm run db:reset` wipes it and re-runs migrations.
 
 ## Scripts
 
@@ -44,6 +40,8 @@ Next.js 16 (App Router, Cache Components) · React 19 · Neon Postgres · Drizzl
 | `npm run build` | Production build |
 | `npm test` | Unit tests (BP classifier, filter parsing) |
 | `npm run lint` | ESLint |
+| `npm run db:up` / `db:down` | Start / stop local Postgres (Docker) |
+| `npm run db:reset` | Wipe local database and re-run migrations |
 | `npm run db:generate` | Generate a migration after editing `src/db/schema.ts` |
 | `npm run db:migrate` | Apply migrations to the database |
 | `npm run db:studio` | Browse data in Drizzle Studio |
@@ -78,4 +76,4 @@ src/
 
 ## Deploy
 
-Works on Vercel. Set `DATABASE_URL`, `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` (your production URL) in the project's environment variables, and run `npm run db:migrate` against the production database.
+Works on Vercel with Neon. Create a Neon project, then set `DATABASE_URL` (Neon **pooled** connection string), `BETTER_AUTH_SECRET` (`openssl rand -base64 32`) and `BETTER_AUTH_URL` (your production URL) in the Vercel project's environment variables. Run `DATABASE_URL=<neon url> npm run db:migrate` once to create the tables.
