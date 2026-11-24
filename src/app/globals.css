@@ -49,72 +49,73 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Calm teal theme: tinted surfaces (no pure white), slate ink (no pure black). */
+  --background: oklch(0.962 0.012 205);
+  --foreground: oklch(0.29 0.03 235);
+  --card: oklch(0.985 0.006 205);
+  --card-foreground: oklch(0.29 0.03 235);
+  --popover: oklch(0.985 0.006 205);
+  --popover-foreground: oklch(0.29 0.03 235);
+  --primary: oklch(0.53 0.09 192);
+  --primary-foreground: oklch(0.985 0.01 192);
+  --secondary: oklch(0.93 0.02 200);
+  --secondary-foreground: oklch(0.32 0.04 220);
+  --muted: oklch(0.935 0.016 205);
+  --muted-foreground: oklch(0.5 0.025 230);
+  --accent: oklch(0.92 0.03 192);
+  --accent-foreground: oklch(0.32 0.05 200);
+  --destructive: oklch(0.577 0.2 27);
+  --border: oklch(0.885 0.016 210);
+  --input: oklch(0.865 0.018 210);
+  --ring: oklch(0.62 0.08 192);
+  --chart-1: oklch(0.53 0.09 192);
+  --chart-2: oklch(0.6 0.12 250);
+  --chart-3: oklch(0.7 0.13 60);
+  --chart-4: oklch(0.6 0.1 150);
+  --chart-5: oklch(0.55 0.12 300);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.975 0.008 205);
+  --sidebar-foreground: oklch(0.29 0.03 235);
+  --sidebar-primary: oklch(0.53 0.09 192);
+  --sidebar-primary-foreground: oklch(0.985 0.01 192);
+  --sidebar-accent: oklch(0.93 0.02 200);
+  --sidebar-accent-foreground: oklch(0.32 0.04 220);
+  --sidebar-border: oklch(0.885 0.016 210);
+  --sidebar-ring: oklch(0.62 0.08 192);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: oklch(0.2 0.02 235);
+  --foreground: oklch(0.93 0.01 210);
+  --card: oklch(0.245 0.022 235);
+  --card-foreground: oklch(0.93 0.01 210);
+  --popover: oklch(0.26 0.022 235);
+  --popover-foreground: oklch(0.93 0.01 210);
+  --primary: oklch(0.72 0.1 190);
+  --primary-foreground: oklch(0.2 0.03 220);
+  --secondary: oklch(0.3 0.025 230);
+  --secondary-foreground: oklch(0.93 0.01 210);
+  --muted: oklch(0.29 0.022 235);
+  --muted-foreground: oklch(0.72 0.02 220);
+  --accent: oklch(0.32 0.04 200);
+  --accent-foreground: oklch(0.93 0.01 210);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.6 0.08 190);
+  --chart-1: oklch(0.72 0.1 190);
+  --chart-2: oklch(0.7 0.12 250);
+  --chart-3: oklch(0.78 0.13 70);
+  --chart-4: oklch(0.7 0.1 150);
+  --chart-5: oklch(0.68 0.12 300);
+  --sidebar: oklch(0.245 0.022 235);
+  --sidebar-foreground: oklch(0.93 0.01 210);
+  --sidebar-primary: oklch(0.72 0.1 190);
+  --sidebar-primary-foreground: oklch(0.2 0.03 220);
+  --sidebar-accent: oklch(0.3 0.025 230);
+  --sidebar-accent-foreground: oklch(0.93 0.01 210);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: oklch(0.6 0.08 190);
 }
 
 @layer base {
@@ -132,12 +133,76 @@
 :root {
   --series-systolic: #2a78d6;
   --series-diastolic: #eb6834;
-  --chart-surface: #fcfcfb;
   --chart-grid: color-mix(in oklch, var(--foreground) 8%, transparent);
   --chart-threshold: color-mix(in oklch, var(--foreground) 35%, transparent);
 }
 .dark {
   --series-systolic: #3987e5;
   --series-diastolic: #d95926;
-  --chart-surface: #1a1a19;
+}
+
+/* ---------- Smooth navigation ---------- */
+
+/* Reserve scrollbar space so pages of different heights don't shift sideways. */
+html {
+  scrollbar-gutter: stable;
+}
+
+:root {
+  --duration-exit: 120ms;
+  --duration-enter: 220ms;
+}
+
+@keyframes vt-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes vt-rise {
+  from { transform: translateY(6px); }
+  to { transform: translateY(0); }
+}
+
+/* Live root: unanimated regions keep rendering instead of freezing behind a snapshot. */
+::view-transition-old(root) {
+  display: none;
+}
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* Page change: old page fades out quickly, new page fades in with a slight rise. */
+::view-transition-old(.page-exit) {
+  animation: var(--duration-exit) ease-in both vt-fade reverse;
+}
+::view-transition-new(.page-enter) {
+  animation:
+    var(--duration-enter) ease-out var(--duration-exit) both vt-fade,
+    var(--duration-enter) ease-out var(--duration-exit) both vt-rise;
+}
+
+/* Streamed data replacing its skeleton. */
+::view-transition-new(.reveal) {
+  animation: var(--duration-enter) ease-out both vt-fade;
+}
+
+/* Header stays put above animating content (has backdrop-filter, so drop the old snapshot). */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
 }

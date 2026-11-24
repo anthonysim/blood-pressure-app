@@ -2,6 +2,7 @@ import { HeartPulseIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { NavLinks, NavLinksView } from "@/components/nav-links";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { TimezoneSync } from "@/components/timezone-sync";
 import { buttonVariants } from "@/components/ui/button";
 import { UserMenu } from "@/components/user-menu";
@@ -10,7 +11,7 @@ import { requireUser } from "@/lib/auth";
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <header className="sticky top-0 z-10 border-b bg-background/90 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b bg-card/85 backdrop-blur [view-transition-name:site-header]">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
             <HeartPulseIcon className="size-5 text-red-500" aria-hidden />
@@ -24,6 +25,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <PlusIcon aria-hidden />
               <span className="hidden sm:inline">Add reading</span>
             </Link>
+            <ThemeToggle />
             <Suspense fallback={<div className="size-8 rounded-full bg-muted" />}>
               <CurrentUserMenu />
             </Suspense>

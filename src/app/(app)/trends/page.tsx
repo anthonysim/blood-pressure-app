@@ -1,22 +1,40 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { BpCategoryChart } from "@/components/bp-category-chart";
 import { BloodPressureChart, PeriodChart, PulseChart } from "@/components/charts/lazy";
 import { FilterBar } from "@/components/filter-bar";
 import { SavedSearches } from "@/components/saved-searches";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getSavedSearches, getTrends } from "@/lib/data";
 import { parseFilters, serializeFilters } from "@/lib/filters";
+import { PageTransition, Reveal } from "@/components/transitions";
+import { TrendsSkeleton } from "@/components/skeletons";
 
 export const metadata: Metadata = { title: "Trends" };
 
 export default function TrendsPage({ searchParams }: PageProps<"/trends">) {
   return (
-    <div className="grid gap-4">
-      <h1 className="text-2xl font-semibold">Trends</h1>
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-xl bg-muted" />}>
-        <TrendsContent searchParams={searchParams} />
-      </Suspense>
-    </div>
+    <PageTransition>
+      <div className="grid gap-4">
+        <h1 className="text-2xl font-semibold">Trends</h1>
+        <Suspense fallback={<TrendsSkeleton />}>
+          <Reveal>
+            <div className="grid gap-4">
+              <TrendsContent searchParams={searchParams} />
+            </div>
+          </Reveal>
+        </Suspense>
+        <Card>
+          <CardHeader>
+            <CardTitle>Blood pressure categories</CardTitle>
+            <CardDescription>American Heart Association guideline</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <BpCategoryChart />
+          </CardContent>
+        </Card>
+      </div>
+    </PageTransition>
   );
 }
 
@@ -27,10 +45,10 @@ async function TrendsContent({ searchParams }: { searchParams: PageProps<"/trend
 
   return (
     <>
-      <FilterBar key={query} basePath="/trends" filters={filters} />
+      <FilterBar basePath="/trends" filters={filters} />
       <SavedSearches basePath="/trends" saved={saved} currentQuery={query} />
       {daily.length === 0 ? (
-        <p className="rounded-xl border border-dashed bg-background p-10 text-center text-muted-foreground">
+        <p className="rounded-xl border border-dashed bg-card p-10 text-center text-muted-foreground">
           No readings match these filters.
         </p>
       ) : (

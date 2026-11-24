@@ -6,21 +6,27 @@ import { ReadingForm } from "@/components/reading-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getReading } from "@/lib/data";
 import { formatInZone } from "@/lib/dates";
+import { PageTransition, Reveal } from "@/components/transitions";
+import { FormSkeleton } from "@/components/skeletons";
 
 export const metadata: Metadata = { title: "Edit reading" };
 
 export default function EditReadingPage({ params }: PageProps<"/readings/[id]/edit">) {
   return (
-    <Card className="mx-auto max-w-xl">
-      <CardHeader>
-        <CardTitle>Edit reading</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
-          <EditReadingForm params={params} />
-        </Suspense>
-      </CardContent>
-    </Card>
+    <PageTransition>
+      <Card className="mx-auto max-w-xl">
+        <CardHeader>
+          <CardTitle>Edit reading</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Suspense fallback={<FormSkeleton />}>
+            <Reveal>
+              <EditReadingForm params={params} />
+            </Reveal>
+          </Suspense>
+        </CardContent>
+      </Card>
+    </PageTransition>
   );
 }
 
