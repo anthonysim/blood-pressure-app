@@ -12,17 +12,25 @@ import { PERIOD_LABELS } from "@/lib/bp";
 import { getReadings, getSavedSearches } from "@/lib/data";
 import { formatInZone } from "@/lib/dates";
 import { hasActiveFilters, parseFilters, serializeFilters } from "@/lib/filters";
+import { PageTransition, Reveal } from "@/components/transitions";
+import { ListPageSkeleton } from "@/components/skeletons";
 
 export const metadata: Metadata = { title: "Readings" };
 
 export default function ReadingsPage({ searchParams }: PageProps<"/readings">) {
   return (
-    <div className="grid gap-4">
-      <h1 className="text-2xl font-semibold">Readings</h1>
-      <Suspense fallback={<div className="h-40 animate-pulse rounded-xl bg-muted" />}>
-        <ReadingsContent searchParams={searchParams} />
-      </Suspense>
-    </div>
+    <PageTransition>
+      <div className="grid gap-4">
+        <h1 className="text-2xl font-semibold">Readings</h1>
+        <Suspense fallback={<ListPageSkeleton />}>
+          <Reveal>
+            <div className="grid gap-4">
+              <ReadingsContent searchParams={searchParams} />
+            </div>
+          </Reveal>
+        </Suspense>
+      </div>
+    </PageTransition>
   );
 }
 
@@ -33,8 +41,7 @@ async function ReadingsContent({ searchParams }: { searchParams: PageProps<"/rea
 
   return (
     <>
-      {/* key resets the uncontrolled inputs when navigating between saved searches */}
-      <FilterBar key={query} basePath="/readings" filters={filters} />
+      <FilterBar basePath="/readings" filters={filters} />
       <SavedSearches basePath="/readings" saved={saved} currentQuery={query} />
       <p className="text-sm text-muted-foreground">
         {rows.length} reading{rows.length === 1 ? "" : "s"}
@@ -53,7 +60,7 @@ type Row = Awaited<ReturnType<typeof getReadings>>["rows"][number];
 
 function ReadingsTable({ rows, tz }: { rows: Row[]; tz: string }) {
   return (
-    <div className="overflow-hidden rounded-xl border bg-background">
+    <div className="overflow-hidden rounded-xl border bg-card">
       <Table>
         <TableHeader>
           <TableRow>
@@ -107,7 +114,7 @@ function ReadingsTable({ rows, tz }: { rows: Row[]; tz: string }) {
 
 function EmptyState({ filtered }: { filtered: boolean }) {
   return (
-    <div className="grid place-items-center gap-3 rounded-xl border border-dashed bg-background p-10 text-center">
+    <div className="grid place-items-center gap-3 rounded-xl border border-dashed bg-card p-10 text-center">
       <p className="text-muted-foreground">
         {filtered ? "No readings match these filters." : "No readings yet."}
       </p>

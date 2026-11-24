@@ -56,7 +56,7 @@ function SavedChip({ basePath, search, active }: { basePath: string; search: Sav
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border bg-background text-xs transition-opacity",
+        "inline-flex items-center rounded-full border bg-card text-xs transition-opacity",
         active && "border-primary bg-primary/10",
         isPending && "opacity-50",
       )}

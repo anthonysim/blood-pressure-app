@@ -1,23 +1,29 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { BpCategoryChart } from "@/components/bp-category-chart";
 import { CategoryBadge } from "@/components/category-badge";
 import { BloodPressureChart } from "@/components/charts/lazy";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PERIOD_LABELS } from "@/lib/bp";
+import { classify, PERIOD_LABELS } from "@/lib/bp";
 import type { PeriodAverage } from "@/lib/chart-types";
 import { getDashboard } from "@/lib/data";
 import { formatInZone } from "@/lib/dates";
+import { PageTransition, Reveal } from "@/components/transitions";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<DashboardSkeleton />}>
-      <Dashboard />
-    </Suspense>
+    <PageTransition>
+      <Suspense fallback={<DashboardSkeleton />}>
+        <Reveal>
+          <Dashboard />
+        </Reveal>
+      </Suspense>
+    </PageTransition>
   );
 }
 
@@ -27,7 +33,7 @@ async function Dashboard() {
 
   if (!latest) {
     return (
-      <div className="grid place-items-center gap-4 rounded-xl border border-dashed bg-background p-12 text-center">
+      <div className="grid place-items-center gap-4 rounded-xl border border-dashed bg-card p-12 text-center">
         <h1 className="text-2xl font-semibold">Welcome, {firstName}</h1>
         <p className="max-w-md text-muted-foreground">
           Log your blood pressure in the morning, at noon and at night to start seeing trends.
@@ -35,6 +41,9 @@ async function Dashboard() {
         <Link href="/readings/new" className={buttonVariants()}>
           Add your first reading
         </Link>
+        <div className="mt-4 w-full max-w-2xl text-left">
+          <BpCategoryChart />
+        </div>
       </div>
     );
   }
@@ -76,6 +85,15 @@ async function Dashboard() {
         </CardHeader>
         <CardContent>
           <BloodPressureChart data={daily30} height={240} compact />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Blood pressure categories</CardTitle>
+          <CardDescription>Where your latest reading falls</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <BpCategoryChart highlight={classify(latest.systolic, latest.diastolic)} />
         </CardContent>
       </Card>
     </div>

@@ -5,21 +5,27 @@ import { ReadingForm } from "@/components/reading-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
 import { formatInZone, getTimeZone } from "@/lib/dates";
+import { PageTransition, Reveal } from "@/components/transitions";
+import { FormSkeleton } from "@/components/skeletons";
 
 export const metadata: Metadata = { title: "Add reading" };
 
 export default function NewReadingPage() {
   return (
-    <Card className="mx-auto max-w-xl">
-      <CardHeader>
-        <CardTitle>Add reading</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
-          <NewReadingForm />
-        </Suspense>
-      </CardContent>
-    </Card>
+    <PageTransition>
+      <Card className="mx-auto max-w-xl">
+        <CardHeader>
+          <CardTitle>Add reading</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Suspense fallback={<FormSkeleton />}>
+            <Reveal>
+              <NewReadingForm />
+            </Reveal>
+          </Suspense>
+        </CardContent>
+      </Card>
+    </PageTransition>
   );
 }
 

@@ -182,8 +182,8 @@ export function BloodPressureChart({ data, height = 320, compact = false }: { da
             dataKey="systolic"
             stroke={SYS}
             strokeWidth={2}
-            dot={showDots ? { r: 3, strokeWidth: 2, fill: "var(--background)" } : false}
-            activeDot={{ r: 5, stroke: "var(--background)", strokeWidth: 2 }}
+            dot={showDots ? { r: 3, strokeWidth: 2, fill: "var(--card)" } : false}
+            activeDot={{ r: 5, stroke: "var(--card)", strokeWidth: 2 }}
             label={endLabel("Systolic", last)}
             isAnimationActive={false}
           />
@@ -192,8 +192,8 @@ export function BloodPressureChart({ data, height = 320, compact = false }: { da
             dataKey="diastolic"
             stroke={DIA}
             strokeWidth={2}
-            dot={showDots ? { r: 3, strokeWidth: 2, fill: "var(--background)" } : false}
-            activeDot={{ r: 5, stroke: "var(--background)", strokeWidth: 2 }}
+            dot={showDots ? { r: 3, strokeWidth: 2, fill: "var(--card)" } : false}
+            activeDot={{ r: 5, stroke: "var(--card)", strokeWidth: 2 }}
             label={endLabel("Diastolic", last)}
             isAnimationActive={false}
           />
@@ -270,8 +270,8 @@ export function PulseChart({ data }: { data: DailyPoint[] }) {
           dataKey="pulse"
           stroke={SYS}
           strokeWidth={2}
-          dot={points.length <= 45 ? { r: 3, strokeWidth: 2, fill: "var(--background)" } : false}
-          activeDot={{ r: 5, stroke: "var(--background)", strokeWidth: 2 }}
+          dot={points.length <= 45 ? { r: 3, strokeWidth: 2, fill: "var(--card)" } : false}
+          activeDot={{ r: 5, stroke: "var(--card)", strokeWidth: 2 }}
           isAnimationActive={false}
         />
       </LineChart>
