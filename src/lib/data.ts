@@ -100,6 +100,27 @@ export async function getReadingsForExport(filters: Filters) {
   return { rows, tz };
 }
 
+/** Readings plus what the doctor report needs to describe them. */
+export async function getReportData(filters: Filters) {
+  const { user, tz, now } = await context();
+  const where = buildWhere(user.id, filters, tz, now);
+  const rows = await db
+    .select({
+      systolic: reading.systolic,
+      diastolic: reading.diastolic,
+      pulse: reading.pulse,
+      period: reading.period,
+      measuredAt: reading.measuredAt,
+      notes: reading.notes,
+    })
+    .from(reading)
+    .where(where)
+    .orderBy(desc(reading.measuredAt))
+    .limit(EXPORT_MAX_ROWS);
+
+  return { rows, tz, now, bounds: dateBounds(filters, tz, now), patientName: user.name };
+}
+
 export async function getReading(id: string) {
   const { user, tz } = await context();
   const [row] = await db
