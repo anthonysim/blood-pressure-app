@@ -38,17 +38,19 @@ async function AdminContent({ searchParams }: { searchParams: PageProps<"/admin"
 
   return (
     <>
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         <Stat label="Users" value={totals.users} />
-        <Stat label="Active in last 7 days" value={totals.activeThisWeek} />
-        <Stat label="Readings logged" value={totals.readings} />
+        <Stat label="Active (7d)" value={totals.activeThisWeek} />
+        <Stat label="Readings logged" value={totals.readings} className="col-span-2 sm:col-span-1" />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Form action="/admin" replace className="flex-1 sm:max-w-xs" role="search">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Form action="/admin" replace className="w-full sm:max-w-xs sm:flex-1" role="search">
           <Input name="q" type="search" defaultValue={search} placeholder="Search name or email" aria-label="Search users" />
         </Form>
-        <CreateUserDialog />
+        <div className="self-start sm:self-auto">
+          <CreateUserDialog />
+        </div>
       </div>
 
       {users.length === 0 ? (
@@ -56,27 +58,66 @@ async function AdminContent({ searchParams }: { searchParams: PageProps<"/admin"
           {search ? `No users match “${search}”.` : "No users yet."}
         </p>
       ) : (
-        <UsersTable users={users} meId={meId} tz={tz} />
+        <>
+          <UsersMobileList users={users} meId={meId} tz={tz} />
+          <UsersTable users={users} meId={meId} tz={tz} />
+        </>
       )}
       {truncated ? <p className="text-sm text-muted-foreground">Showing the newest 200. Search to find others.</p> : null}
     </>
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value, className }: { label: string; value: number; className?: string }) {
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardDescription>{label}</CardDescription>
-        <CardTitle className="text-3xl tabular-nums">{value.toLocaleString()}</CardTitle>
+        <CardTitle className="text-2xl tabular-nums sm:text-3xl">{value.toLocaleString()}</CardTitle>
       </CardHeader>
     </Card>
   );
 }
 
+function UsersMobileList({ users, meId, tz }: { users: AdminUserRow[]; meId: string; tz: string }) {
+  return (
+    <div className="grid gap-2.5 sm:grid-cols-2 lg:hidden">
+      {users.map((u) => (
+        <div key={u.id} className={cn("grid content-start gap-2 rounded-xl border bg-card p-3.5", u.banned && "opacity-60")}>
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <div className="truncate font-medium">{u.name}</div>
+              <div className="truncate text-xs text-muted-foreground">{u.email}</div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <StatusBadge role={u.role} banned={u.banned} reason={u.banReason} isMe={u.id === meId} />
+              {u.id === meId ? null : (
+                <UserActions user={{ id: u.id, name: u.name, email: u.email, banned: u.banned }} size="icon" />
+              )}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+            <span className="tabular-nums">
+              {u.readings.toLocaleString()} reading{u.readings === 1 ? "" : "s"}
+            </span>
+            <span>·</span>
+            <span>Joined {formatInZone(u.createdAt, "MMM d, yyyy", tz)}</span>
+            {u.lastReadingAt ? (
+              <>
+                <span>·</span>
+                <span>Last {formatInZone(u.lastReadingAt, "MMM d, yyyy", tz)}</span>
+              </>
+            ) : null}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function UsersTable({ users, meId, tz }: { users: AdminUserRow[]; meId: string; tz: string }) {
   return (
-    <div className="overflow-x-auto rounded-xl border bg-card">
+    <div className="hidden overflow-x-auto rounded-xl border bg-card lg:block">
       <Table>
         <TableHeader>
           <TableRow>

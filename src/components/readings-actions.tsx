@@ -7,7 +7,7 @@ export function ReadingsActions({ query }: { query: string }) {
   const exportHref = query ? `/api/readings/export?${query}` : "/api/readings/export";
 
   return (
-    <div className="no-print flex items-center gap-2">
+    <div className="no-print flex flex-wrap items-center gap-2">
       <a href={exportHref} className={buttonVariants({ variant: "outline", size: "sm" })}>
         <DownloadIcon aria-hidden />
         Export CSV

@@ -107,6 +107,7 @@ export function ReadingForm({ action, initial, submitLabel, noRedirect = false, 
           value={pulse}
           onChange={(e) => setPulse(e.target.value)}
           errors={errors.pulse}
+          wrapperClassName="col-span-2 sm:col-span-1"
         />
       </div>
 
@@ -142,7 +143,7 @@ export function ReadingForm({ action, initial, submitLabel, noRedirect = false, 
             onChange={(e) => setMeasuredAt(e.target.value)}
             required
             aria-invalid={errors.measuredAt ? true : undefined}
-            className="w-fit"
+            className="w-full sm:w-fit"
           />
           <FieldError errors={errors.measuredAt} />
         </div>
@@ -150,7 +151,7 @@ export function ReadingForm({ action, initial, submitLabel, noRedirect = false, 
         <fieldset className="grid gap-2">
           <legend className="mb-2 text-sm font-medium">Time of day</legend>
           <input type="hidden" name="period" value={period} />
-          <div className="inline-flex w-fit rounded-lg border p-0.5" role="radiogroup">
+          <div className="grid w-full grid-cols-3 rounded-lg border p-0.5 sm:inline-flex sm:w-fit" role="radiogroup">
             {PERIODS.map((p) => (
               <button
                 key={p}
@@ -159,7 +160,7 @@ export function ReadingForm({ action, initial, submitLabel, noRedirect = false, 
                 aria-checked={period === p}
                 onClick={() => setChosenPeriod(p)}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-sm transition-colors",
+                  "rounded-md px-3 py-2 text-sm transition-colors sm:py-1.5",
                   period === p ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -191,7 +192,7 @@ export function ReadingForm({ action, initial, submitLabel, noRedirect = false, 
                 onClick={() => appendTag(tag)}
                 disabled={added}
                 className={cn(
-                  "rounded-full border px-2 py-0.5 text-xs transition-colors",
+                  "rounded-full border px-2.5 py-1 text-xs transition-colors sm:px-2 sm:py-0.5",
                   added
                     ? "border-primary/40 bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -211,19 +212,19 @@ export function ReadingForm({ action, initial, submitLabel, noRedirect = false, 
         </p>
       ) : null}
 
-      <div className="flex gap-2">
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving…" : submitLabel}
-        </Button>
+      <div className="flex flex-col-reverse gap-2 sm:flex-row">
         {onCancel ? (
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isPending} className="h-10 w-full sm:order-2 sm:h-8 sm:w-auto">
             Cancel
           </Button>
         ) : (
-          <Link href="/readings" className={buttonVariants({ variant: "outline" })}>
+          <Link href="/readings" className={buttonVariants({ variant: "outline", className: "h-10 w-full sm:order-2 sm:h-8 sm:w-auto" })}>
             Cancel
           </Link>
         )}
+        <Button type="submit" disabled={isPending} className="h-10 w-full sm:order-1 sm:h-8 sm:w-auto">
+          {isPending ? "Saving…" : submitLabel}
+        </Button>
       </div>
     </form>
   );
@@ -234,15 +235,17 @@ function NumberField({
   label,
   unit,
   errors,
+  wrapperClassName,
   ...props
 }: {
   name: string;
   label: string;
   unit: string;
   errors?: string[];
+  wrapperClassName?: string;
 } & React.ComponentProps<"input">) {
   return (
-    <div className="grid gap-2">
+    <div className={cn("grid gap-2", wrapperClassName)}>
       <Label htmlFor={name}>
         {label} <span className="font-normal text-muted-foreground">({unit})</span>
       </Label>

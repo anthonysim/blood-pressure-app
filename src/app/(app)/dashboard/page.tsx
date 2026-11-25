@@ -50,7 +50,7 @@ async function Dashboard() {
 
   if (!latest) {
     return (
-      <div className="grid place-items-center gap-4 rounded-xl border border-dashed bg-card p-12 text-center">
+      <div className="grid place-items-center gap-4 rounded-xl border border-dashed bg-card p-6 text-center sm:p-10 md:p-12">
         <h1 className="text-2xl font-semibold">Welcome, {firstName}</h1>
         <p className="max-w-md text-muted-foreground">
           Log your blood pressure in the morning, at noon and at night to start seeing trends.
@@ -72,8 +72,8 @@ async function Dashboard() {
 
       <TodayCheckIns todayByPeriod={todayByPeriod} tz={tz} />
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="md:col-span-2 lg:col-span-1">
           <CardHeader>
             <CardDescription>Latest reading</CardDescription>
             <CardTitle className="flex items-baseline gap-2">
@@ -96,12 +96,12 @@ async function Dashboard() {
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-start justify-between">
-          <div className="grid gap-1">
+        <CardHeader className="flex flex-row items-start justify-between gap-2">
+          <div className="grid min-w-0 gap-1">
             <CardTitle>Last 30 days</CardTitle>
             <CardDescription>Daily average &amp; range, mmHg</CardDescription>
           </div>
-          <Link href="/trends" className={buttonVariants({ variant: "outline", size: "sm" })}>
+          <Link href="/trends" className={buttonVariants({ variant: "outline", size: "sm", className: "shrink-0" })}>
             All trends
           </Link>
         </CardHeader>
@@ -137,7 +137,7 @@ function TodayCheckIns({
           </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="grid gap-2 sm:grid-cols-3">
+      <CardContent className="grid gap-2.5 md:grid-cols-3">
         {PERIODS.map((period) => {
           const entry = todayByPeriod[period];
           return (
@@ -145,13 +145,13 @@ function TodayCheckIns({
               key={period}
               className="flex items-center justify-between gap-2 rounded-lg border bg-background/60 px-3 py-2.5"
             >
-              <div className="grid gap-0.5">
+              <div className="grid min-w-0 gap-0.5">
                 <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  {entry ? <CheckCircle2Icon className="size-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden /> : null}
+                  {entry ? <CheckCircle2Icon className="size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden /> : null}
                   {PERIOD_LABELS[period]}
                 </span>
                 {entry ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                     <span className="text-sm font-semibold tabular-nums">
                       {entry.systolic}/{entry.diastolic}
                     </span>
@@ -163,16 +163,18 @@ function TodayCheckIns({
                   <span className="text-xs text-muted-foreground">Not logged yet</span>
                 )}
               </div>
-              {entry ? (
-                <CategoryBadge systolic={entry.systolic} diastolic={entry.diastolic} />
-              ) : (
-                <QuickAddReadingDialog
-                  defaultPeriod={period}
-                  triggerLabel="Log"
-                  variant="outline"
-                  size="xs"
-                />
-              )}
+              <div className="shrink-0">
+                {entry ? (
+                  <CategoryBadge systolic={entry.systolic} diastolic={entry.diastolic} />
+                ) : (
+                  <QuickAddReadingDialog
+                    defaultPeriod={period}
+                    triggerLabel="Log"
+                    variant="outline"
+                    size="sm"
+                  />
+                )}
+              </div>
             </div>
           );
         })}
@@ -247,10 +249,10 @@ function DashboardSkeleton() {
     <div className="grid gap-4">
       <div className="h-8 w-40 animate-pulse rounded bg-muted" />
       <div className="h-28 animate-pulse rounded-xl bg-muted" />
-      <div className="grid gap-4 md:grid-cols-3">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="h-48 animate-pulse rounded-xl bg-muted" />
-        ))}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="h-48 animate-pulse rounded-xl bg-muted md:col-span-2 lg:col-span-1" />
+        <div className="h-48 animate-pulse rounded-xl bg-muted" />
+        <div className="h-48 animate-pulse rounded-xl bg-muted" />
       </div>
       <div className="h-80 animate-pulse rounded-xl bg-muted" />
     </div>

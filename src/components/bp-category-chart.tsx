@@ -27,42 +27,79 @@ const FULL_LABEL: Record<Category, string> = {
 /** The AHA blood pressure categories table. `highlight` marks the row for the user's latest reading. */
 export function BpCategoryChart({ highlight }: { highlight?: Category }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[520px] border-separate border-spacing-y-1 text-sm">
-        <caption className="sr-only">American Heart Association blood pressure categories</caption>
-        <thead>
-          <tr className="text-left text-xs text-muted-foreground">
-            <th scope="col" className="px-3 pb-1 font-medium">Category</th>
-            <th scope="col" className="px-3 pb-1 font-medium">Systolic (top)</th>
-            <th scope="col" className="w-14 pb-1" aria-label="and / or" />
-            <th scope="col" className="px-3 pb-1 font-medium">Diastolic (bottom)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ROWS.map((row) => {
-            const active = row.category === highlight;
-            return (
-              <tr
-                key={row.category}
-                aria-current={active ? "true" : undefined}
-                className={cn(CATEGORY_INFO[row.category].className, active && "outline-2 outline-offset-1 outline-foreground")}
-              >
-                <th scope="row" className="rounded-l-lg px-3 py-2.5 text-left font-semibold">
-                  {FULL_LABEL[row.category]}
-                  {row.note ? <div className="text-xs font-normal">{row.note}</div> : null}
-                  {active ? (
-                    <div className="mt-0.5 text-xs font-medium">← Your latest reading</div>
-                  ) : null}
-                </th>
-                <td className="px-3 py-2.5 tabular-nums">{row.systolic}</td>
-                <td className="py-2.5 text-center text-xs font-semibold uppercase">{row.joiner}</td>
-                <td className="rounded-r-lg px-3 py-2.5 tabular-nums">{row.diastolic}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <p className="mt-2 text-xs text-muted-foreground">
+    <div>
+      {/* Mobile stacked cards (< sm): no horizontal scrolling */}
+      <div className="grid gap-2 sm:hidden">
+        {ROWS.map((row) => {
+          const active = row.category === highlight;
+          return (
+            <div
+              key={row.category}
+              aria-current={active ? "true" : undefined}
+              className={cn(
+                "grid gap-1 rounded-lg px-3 py-2.5 text-sm",
+                CATEGORY_INFO[row.category].className,
+                active && "outline-2 outline-offset-1 outline-foreground",
+              )}
+            >
+              <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+                <span className="font-semibold">{FULL_LABEL[row.category]}</span>
+                {active ? <span className="text-xs font-medium">← Your latest</span> : null}
+              </div>
+              {row.note ? <div className="text-xs">{row.note}</div> : null}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs tabular-nums">
+                <span>
+                  <span className="opacity-75">Sys:</span> {row.systolic}
+                </span>
+                <span className="font-semibold uppercase opacity-80">{row.joiner}</span>
+                <span>
+                  <span className="opacity-75">Dia:</span> {row.diastolic}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tablet & desktop table (sm+) */}
+      <div className="hidden overflow-x-auto sm:block">
+        <table className="w-full min-w-[520px] border-separate border-spacing-y-1 text-sm">
+          <caption className="sr-only">American Heart Association blood pressure categories</caption>
+          <thead>
+            <tr className="text-left text-xs text-muted-foreground">
+              <th scope="col" className="px-3 pb-1 font-medium">Category</th>
+              <th scope="col" className="px-3 pb-1 font-medium">Systolic (top)</th>
+              <th scope="col" className="w-14 pb-1" aria-label="and / or" />
+              <th scope="col" className="px-3 pb-1 font-medium">Diastolic (bottom)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ROWS.map((row) => {
+              const active = row.category === highlight;
+              return (
+                <tr
+                  key={row.category}
+                  aria-current={active ? "true" : undefined}
+                  className={cn(CATEGORY_INFO[row.category].className, active && "outline-2 outline-offset-1 outline-foreground")}
+                >
+                  <th scope="row" className="rounded-l-lg px-3 py-2.5 text-left font-semibold">
+                    {FULL_LABEL[row.category]}
+                    {row.note ? <div className="text-xs font-normal">{row.note}</div> : null}
+                    {active ? (
+                      <div className="mt-0.5 text-xs font-medium">← Your latest reading</div>
+                    ) : null}
+                  </th>
+                  <td className="px-3 py-2.5 tabular-nums">{row.systolic}</td>
+                  <td className="py-2.5 text-center text-xs font-semibold uppercase">{row.joiner}</td>
+                  <td className="rounded-r-lg px-3 py-2.5 tabular-nums">{row.diastolic}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="mt-2.5 text-xs text-muted-foreground">
         Source: American Heart Association. When the two numbers fall in different categories, the higher category
         applies. This is a reference, not a diagnosis — talk to your doctor about your readings.
       </p>
@@ -85,16 +122,16 @@ export function CollapsibleBpCategories({
       open={defaultOpen || undefined}
       className="group rounded-xl border bg-card text-card-foreground shadow-xs"
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 select-none [&::-webkit-details-marker]:hidden">
-        <div className="grid gap-0.5">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 select-none sm:gap-4 sm:px-5 sm:py-4 [&::-webkit-details-marker]:hidden">
+        <div className="grid min-w-0 gap-0.5">
           <span className="text-sm font-semibold">Blood pressure categories</span>
           <span className="text-xs text-muted-foreground">{description}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {highlight ? (
             <span
               className={cn(
-                "rounded-full px-2 py-0.5 text-xs font-medium",
+                "rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap",
                 CATEGORY_INFO[highlight].className,
               )}
             >
@@ -107,7 +144,7 @@ export function CollapsibleBpCategories({
           />
         </div>
       </summary>
-      <div className="border-t px-5 pt-3 pb-4">
+      <div className="border-t px-4 pt-3 pb-4 sm:px-5">
         <BpCategoryChart highlight={highlight} />
       </div>
     </details>

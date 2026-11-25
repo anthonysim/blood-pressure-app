@@ -1,7 +1,7 @@
 "use client";
 
 import { format, parseISO, subDays } from "date-fns";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Area,
   Bar,
@@ -24,7 +24,20 @@ const SYS = "var(--series-systolic)";
 const DIA = "var(--series-diastolic)";
 const PULSE = "var(--series-pulse)";
 const AXIS_TICK = { fontSize: 12, fill: "var(--muted-foreground)" };
+const AXIS_TICK_SM = { fontSize: 11, fill: "var(--muted-foreground)" };
 const GRID = "var(--chart-grid)";
+
+function useIsNarrow() {
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const sync = () => setNarrow(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  return narrow;
+}
 
 // AHA thresholds: elevated/stage-1/stage-2 systolic, stage-1/stage-2 diastolic.
 const THRESHOLDS = [
@@ -185,6 +198,7 @@ export function BloodPressureChart({
   height?: number;
   compact?: boolean;
 }) {
+  const isNarrow = useIsNarrow();
   const [smoothed, setSmoothed] = useState(false);
   const series = useMemo<ChartDailyPoint[]>(() => {
     const base = smoothed ? rollingWeekly(data) : data;
@@ -198,6 +212,8 @@ export function BloodPressureChart({
   const hasRange = !smoothed && data.some((d) => d.count > 1 && (d.sysMin !== d.sysMax || d.diaMin !== d.diaMax));
   const last = series.length - 1;
   const showDots = series.length <= 45;
+  const chartHeight = isNarrow ? Math.min(height, compact ? 210 : 250) : height;
+  const axisTick = isNarrow ? AXIS_TICK_SM : AXIS_TICK;
 
   return (
     <div className="grid gap-3">
@@ -224,7 +240,7 @@ export function BloodPressureChart({
                 aria-checked={smoothed === value}
                 onClick={() => setSmoothed(value)}
                 className={cn(
-                  "rounded-md px-2 py-1 transition-colors",
+                  "rounded-md px-2.5 py-1.5 transition-colors sm:px-2 sm:py-1",
                   smoothed === value
                     ? "bg-muted font-medium text-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -236,22 +252,26 @@ export function BloodPressureChart({
           </div>
         )}
       </div>
-      <ResponsiveContainer width="100%" height={height}>
-        <ComposedChart data={series} margin={{ top: 8, right: 64, bottom: 0, left: -16 }}>
+      <ResponsiveContainer width="100%" height={chartHeight}>
+        <ComposedChart
+          data={series}
+          margin={isNarrow ? { top: 8, right: 10, bottom: 0, left: -22 } : { top: 8, right: 64, bottom: 0, left: -16 }}
+        >
           <CartesianGrid stroke={GRID} vertical={false} />
           <XAxis
             dataKey="date"
             tickFormatter={fmtDay}
-            tick={AXIS_TICK}
+            tick={axisTick}
             tickLine={false}
             axisLine={false}
-            minTickGap={24}
+            minTickGap={isNarrow ? 32 : 24}
           />
           <YAxis
             domain={[50, (max: number) => Math.max(160, Math.ceil(max / 10) * 10)]}
-            tick={AXIS_TICK}
+            tick={axisTick}
             tickLine={false}
             axisLine={false}
+            width={isNarrow ? 44 : 52}
           />
           {compact
             ? null
@@ -261,7 +281,11 @@ export function BloodPressureChart({
                   y={t.y}
                   stroke="var(--chart-threshold)"
                   strokeDasharray="3 4"
-                  label={{ value: t.label, position: "left", fontSize: 10, fill: "var(--muted-foreground)" }}
+                  label={
+                    isNarrow
+                      ? undefined
+                      : { value: t.label, position: "left", fontSize: 10, fill: "var(--muted-foreground)" }
+                  }
                 />
               ))}
           <Tooltip
@@ -295,7 +319,7 @@ export function BloodPressureChart({
             strokeWidth={2}
             dot={showDots ? { r: 3, strokeWidth: 2, fill: "var(--card)" } : false}
             activeDot={{ r: 5, stroke: "var(--card)", strokeWidth: 2 }}
-            label={endLabel("Systolic", last)}
+            label={isNarrow ? undefined : endLabel("Systolic", last)}
             isAnimationActive={false}
           />
           <Line
@@ -305,7 +329,7 @@ export function BloodPressureChart({
             strokeWidth={2}
             dot={showDots ? { r: 3, strokeWidth: 2, fill: "var(--card)" } : false}
             activeDot={{ r: 5, stroke: "var(--card)", strokeWidth: 2 }}
-            label={endLabel("Diastolic", last)}
+            label={isNarrow ? undefined : endLabel("Diastolic", last)}
             isAnimationActive={false}
           />
         </ComposedChart>
@@ -340,6 +364,8 @@ function PeriodTooltip({ active, payload }: TipProps) {
 }
 
 export function PeriodChart({ data }: { data: PeriodAverage[] }) {
+  const isNarrow = useIsNarrow();
+  const axisTick = isNarrow ? AXIS_TICK_SM : AXIS_TICK;
   const rows: PeriodRow[] = data.map((d) => ({ ...d, label: PERIOD_LABELS[d.period] }));
   return (
     <div className="grid gap-3">
@@ -349,15 +375,21 @@ export function PeriodChart({ data }: { data: PeriodAverage[] }) {
           { label: "Diastolic", color: DIA },
         ]}
       />
-      <ResponsiveContainer width="100%" height={260}>
-        <BarChart data={rows} barGap={2} barCategoryGap="30%" margin={{ top: 16, right: 8, bottom: 0, left: -16 }}>
+      <ResponsiveContainer width="100%" height={isNarrow ? 220 : 260}>
+        <BarChart
+          data={rows}
+          barGap={2}
+          barCategoryGap="30%"
+          margin={isNarrow ? { top: 12, right: 8, bottom: 0, left: -22 } : { top: 16, right: 8, bottom: 0, left: -16 }}
+        >
           <CartesianGrid stroke={GRID} vertical={false} />
-          <XAxis dataKey="label" tick={AXIS_TICK} tickLine={false} axisLine={false} />
+          <XAxis dataKey="label" tick={axisTick} tickLine={false} axisLine={false} />
           <YAxis
             domain={[0, (max: number) => Math.max(160, Math.ceil(max / 20) * 20)]}
-            tick={AXIS_TICK}
+            tick={axisTick}
             tickLine={false}
             axisLine={false}
+            width={isNarrow ? 44 : 52}
           />
           <Tooltip
             cursor={{ fill: "var(--muted)", opacity: 0.6 }}
@@ -382,6 +414,8 @@ function PulseTooltip({ active, payload }: TipProps) {
 }
 
 export function PulseChart({ data }: { data: DailyPoint[] }) {
+  const isNarrow = useIsNarrow();
+  const axisTick = isNarrow ? AXIS_TICK_SM : AXIS_TICK;
   const points = data.filter((d) => d.pulse !== null);
   if (points.length === 0) {
     return <p className="py-10 text-center text-sm text-muted-foreground">No pulse readings in this range.</p>;
@@ -389,23 +423,27 @@ export function PulseChart({ data }: { data: DailyPoint[] }) {
   return (
     <div className="grid gap-3">
       <Legend items={[{ label: "Pulse (bpm)", color: PULSE }]} />
-      <ResponsiveContainer width="100%" height={220}>
-        <LineChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
+      <ResponsiveContainer width="100%" height={isNarrow ? 200 : 220}>
+        <LineChart
+          data={points}
+          margin={isNarrow ? { top: 8, right: 8, bottom: 0, left: -22 } : { top: 8, right: 8, bottom: 0, left: -16 }}
+        >
           <CartesianGrid stroke={GRID} vertical={false} />
           <XAxis
             dataKey="date"
             tickFormatter={fmtDay}
-            tick={AXIS_TICK}
+            tick={axisTick}
             tickLine={false}
             axisLine={false}
-            minTickGap={24}
+            minTickGap={isNarrow ? 32 : 24}
           />
           <YAxis
             domain={["dataMin - 10", "dataMax + 10"]}
             allowDecimals={false}
-            tick={AXIS_TICK}
+            tick={axisTick}
             tickLine={false}
             axisLine={false}
+            width={isNarrow ? 44 : 52}
           />
           <Tooltip
             cursor={{ stroke: "var(--muted-foreground)", strokeWidth: 1 }}
