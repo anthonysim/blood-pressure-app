@@ -1,6 +1,16 @@
 import type { Period } from "./bp";
 
-export type DailyPoint = { date: string; systolic: number; diastolic: number; pulse: number | null; count: number };
+export type DailyPoint = {
+  date: string;
+  systolic: number;
+  diastolic: number;
+  sysMin: number;
+  sysMax: number;
+  diaMin: number;
+  diaMax: number;
+  pulse: number | null;
+  count: number;
+};
 
 export type PeriodAverage = {
   period: Period;

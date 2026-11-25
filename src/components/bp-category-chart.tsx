@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from "lucide-react";
 import { CATEGORY_INFO, type Category } from "@/lib/bp";
 import { cn } from "@/lib/utils";
 
@@ -66,5 +67,49 @@ export function BpCategoryChart({ highlight }: { highlight?: Category }) {
         applies. This is a reference, not a diagnosis — talk to your doctor about your readings.
       </p>
     </div>
+  );
+}
+
+/** Compact collapsible AHA reference card so it doesn't dominate vertical space. */
+export function CollapsibleBpCategories({
+  highlight,
+  description = "American Heart Association guideline",
+  defaultOpen = false,
+}: {
+  highlight?: Category;
+  description?: string;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <details
+      open={defaultOpen || undefined}
+      className="group rounded-xl border bg-card text-card-foreground shadow-xs"
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 select-none [&::-webkit-details-marker]:hidden">
+        <div className="grid gap-0.5">
+          <span className="text-sm font-semibold">Blood pressure categories</span>
+          <span className="text-xs text-muted-foreground">{description}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {highlight ? (
+            <span
+              className={cn(
+                "rounded-full px-2 py-0.5 text-xs font-medium",
+                CATEGORY_INFO[highlight].className,
+              )}
+            >
+              {CATEGORY_INFO[highlight].label}
+            </span>
+          ) : null}
+          <ChevronDownIcon
+            className="size-4 text-muted-foreground transition-transform duration-150 group-open:rotate-180"
+            aria-hidden
+          />
+        </div>
+      </summary>
+      <div className="border-t px-5 pt-3 pb-4">
+        <BpCategoryChart highlight={highlight} />
+      </div>
+    </details>
   );
 }

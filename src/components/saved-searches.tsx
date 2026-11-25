@@ -30,7 +30,7 @@ type Props = {
 
 export function SavedSearches({ basePath, saved, currentQuery }: Props) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="no-print flex flex-wrap items-center gap-2">
       <span className="text-sm font-medium">Saved searches</span>
       {saved.length === 0 ? (
         <span className="text-sm text-muted-foreground">None yet — apply filters, then save them.</span>

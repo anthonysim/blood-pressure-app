@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -133,12 +133,14 @@
 :root {
   --series-systolic: #2a78d6;
   --series-diastolic: #eb6834;
+  --series-pulse: oklch(0.55 0.14 300);
   --chart-grid: color-mix(in oklch, var(--foreground) 8%, transparent);
   --chart-threshold: color-mix(in oklch, var(--foreground) 35%, transparent);
 }
 .dark {
   --series-systolic: #3987e5;
   --series-diastolic: #d95926;
+  --series-pulse: oklch(0.72 0.14 300);
 }
 
 /* ---------- Smooth navigation ---------- */
@@ -204,5 +206,22 @@ html {
   ::view-transition-group(*) {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
+  }
+}
+
+/* ---------- Doctor-ready print styles ---------- */
+
+@media print {
+  header,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
   }
 }

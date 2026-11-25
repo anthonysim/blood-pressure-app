@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { BpCategoryChart } from "@/components/bp-category-chart";
+import { CollapsibleBpCategories } from "@/components/bp-category-chart";
 import { BloodPressureChart, PeriodChart, PulseChart } from "@/components/charts/lazy";
 import { FilterBar } from "@/components/filter-bar";
 import { SavedSearches } from "@/components/saved-searches";
@@ -24,15 +24,7 @@ export default function TrendsPage({ searchParams }: PageProps<"/trends">) {
             </div>
           </Reveal>
         </Suspense>
-        <Card>
-          <CardHeader>
-            <CardTitle>Blood pressure categories</CardTitle>
-            <CardDescription>American Heart Association guideline</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <BpCategoryChart />
-          </CardContent>
-        </Card>
+        <CollapsibleBpCategories description="American Heart Association guideline" />
       </div>
     </PageTransition>
   );

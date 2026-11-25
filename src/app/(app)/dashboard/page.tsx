@@ -1,17 +1,19 @@
+import { CheckCircle2Icon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { BpCategoryChart } from "@/components/bp-category-chart";
+import { BpCategoryChart, CollapsibleBpCategories } from "@/components/bp-category-chart";
 import { CategoryBadge } from "@/components/category-badge";
 import { BloodPressureChart } from "@/components/charts/lazy";
+import { QuickAddReadingDialog } from "@/components/quick-add-reading-dialog";
+import { PageTransition, Reveal } from "@/components/transitions";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { classify, PERIOD_LABELS } from "@/lib/bp";
+import { classify, PERIOD_LABELS, PERIODS, type Period } from "@/lib/bp";
 import type { PeriodAverage } from "@/lib/chart-types";
-import { getDashboard } from "@/lib/data";
+import { getDashboard, type TodayReading } from "@/lib/data";
 import { formatInZone } from "@/lib/dates";
-import { PageTransition, Reveal } from "@/components/transitions";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -27,8 +29,23 @@ export default function DashboardPage() {
   );
 }
 
+function overallAverage(data: PeriodAverage[]): { systolic: number; diastolic: number; count: number } | null {
+  let sys = 0;
+  let dia = 0;
+  let n = 0;
+  for (const d of data) {
+    if (d.systolic !== null && d.diastolic !== null && d.count > 0) {
+      sys += d.systolic * d.count;
+      dia += d.diastolic * d.count;
+      n += d.count;
+    }
+  }
+  if (n === 0) return null;
+  return { systolic: Math.round(sys / n), diastolic: Math.round(dia / n), count: n };
+}
+
 async function Dashboard() {
-  const { latest, last7, last30, daily30, tz, name } = await getDashboard();
+  const { latest, todayByPeriod, last7, last30, daily30, tz, name } = await getDashboard();
   const firstName = name.split(" ")[0];
 
   if (!latest) {
@@ -38,9 +55,7 @@ async function Dashboard() {
         <p className="max-w-md text-muted-foreground">
           Log your blood pressure in the morning, at noon and at night to start seeing trends.
         </p>
-        <Link href="/readings/new" className={buttonVariants()}>
-          Add your first reading
-        </Link>
+        <QuickAddReadingDialog triggerLabel="Add your first reading" size="default" />
         <div className="mt-4 w-full max-w-2xl text-left">
           <BpCategoryChart />
         </div>
@@ -48,9 +63,15 @@ async function Dashboard() {
     );
   }
 
+  const overall7 = overallAverage(last7);
+  const overall30 = overallAverage(last30);
+
   return (
     <div className="grid gap-4">
       <h1 className="text-2xl font-semibold">Hi, {firstName}</h1>
+
+      <TodayCheckIns todayByPeriod={todayByPeriod} tz={tz} />
+
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
@@ -70,14 +91,15 @@ async function Dashboard() {
             </span>
           </CardContent>
         </Card>
-        <AveragesCard title="Last 7 days" data={last7} />
-        <AveragesCard title="Last 30 days" data={last30} />
+        <AveragesCard title="Last 7 days" data={last7} overall={overall7} compareTo={overall30} />
+        <AveragesCard title="Last 30 days" data={last30} overall={overall30} />
       </div>
+
       <Card>
         <CardHeader className="flex flex-row items-start justify-between">
           <div className="grid gap-1">
             <CardTitle>Last 30 days</CardTitle>
-            <CardDescription>Daily average, mmHg</CardDescription>
+            <CardDescription>Daily average &amp; range, mmHg</CardDescription>
           </div>
           <Link href="/trends" className={buttonVariants({ variant: "outline", size: "sm" })}>
             All trends
@@ -87,24 +109,112 @@ async function Dashboard() {
           <BloodPressureChart data={daily30} height={240} compact />
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Blood pressure categories</CardTitle>
-          <CardDescription>Where your latest reading falls</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <BpCategoryChart highlight={classify(latest.systolic, latest.diastolic)} />
-        </CardContent>
-      </Card>
+
+      <CollapsibleBpCategories
+        highlight={classify(latest.systolic, latest.diastolic)}
+        description="Where your latest reading falls (AHA guideline)"
+      />
     </div>
   );
 }
 
-function AveragesCard({ title, data }: { title: string; data: PeriodAverage[] }) {
+function TodayCheckIns({
+  todayByPeriod,
+  tz,
+}: {
+  todayByPeriod: Partial<Record<Period, TodayReading>>;
+  tz: string;
+}) {
+  const loggedCount = PERIODS.filter((p) => Boolean(todayByPeriod[p])).length;
+
   return (
     <Card>
-      <CardHeader>
-        <CardDescription>Averages · {title}</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between pb-3">
+        <div className="grid gap-0.5">
+          <CardTitle className="text-base">Today&apos;s check-ins</CardTitle>
+          <CardDescription>
+            {loggedCount} of {PERIODS.length} logged today
+          </CardDescription>
+        </div>
+      </CardHeader>
+      <CardContent className="grid gap-2 sm:grid-cols-3">
+        {PERIODS.map((period) => {
+          const entry = todayByPeriod[period];
+          return (
+            <div
+              key={period}
+              className="flex items-center justify-between gap-2 rounded-lg border bg-background/60 px-3 py-2.5"
+            >
+              <div className="grid gap-0.5">
+                <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  {entry ? <CheckCircle2Icon className="size-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden /> : null}
+                  {PERIOD_LABELS[period]}
+                </span>
+                {entry ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold tabular-nums">
+                      {entry.systolic}/{entry.diastolic}
+                    </span>
+                    <span className="text-xs text-muted-foreground tabular-nums">
+                      {formatInZone(entry.measuredAt, "h:mm a", tz)}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-xs text-muted-foreground">Not logged yet</span>
+                )}
+              </div>
+              {entry ? (
+                <CategoryBadge systolic={entry.systolic} diastolic={entry.diastolic} />
+              ) : (
+                <QuickAddReadingDialog
+                  defaultPeriod={period}
+                  triggerLabel="Log"
+                  variant="outline"
+                  size="xs"
+                />
+              )}
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+}
+
+function AveragesCard({
+  title,
+  data,
+  overall,
+  compareTo,
+}: {
+  title: string;
+  data: PeriodAverage[];
+  overall: { systolic: number; diastolic: number; count: number } | null;
+  compareTo?: { systolic: number; diastolic: number; count: number } | null;
+}) {
+  const sysDelta = overall && compareTo ? overall.systolic - compareTo.systolic : null;
+  const diaDelta = overall && compareTo ? overall.diastolic - compareTo.diastolic : null;
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between gap-2">
+          <CardDescription>Averages · {title}</CardDescription>
+          {overall ? <CategoryBadge systolic={overall.systolic} diastolic={overall.diastolic} /> : null}
+        </div>
+        {overall ? (
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 pt-0.5">
+            <span className="text-xl font-semibold tabular-nums">
+              {overall.systolic}/{overall.diastolic}
+            </span>
+            <span className="text-xs text-muted-foreground">overall ({overall.count})</span>
+            {sysDelta !== null && diaDelta !== null && (sysDelta !== 0 || diaDelta !== 0) ? (
+              <span className="text-xs text-muted-foreground tabular-nums">
+                · {sysDelta > 0 ? `+${sysDelta}` : sysDelta}/{diaDelta > 0 ? `+${diaDelta}` : diaDelta} vs 30d
+              </span>
+            ) : null}
+          </div>
+        ) : null}
       </CardHeader>
       <CardContent>
         <Table>
@@ -136,9 +246,10 @@ function DashboardSkeleton() {
   return (
     <div className="grid gap-4">
       <div className="h-8 w-40 animate-pulse rounded bg-muted" />
+      <div className="h-28 animate-pulse rounded-xl bg-muted" />
       <div className="grid gap-4 md:grid-cols-3">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-44 animate-pulse rounded-xl bg-muted" />
+          <div key={i} className="h-48 animate-pulse rounded-xl bg-muted" />
         ))}
       </div>
       <div className="h-80 animate-pulse rounded-xl bg-muted" />
