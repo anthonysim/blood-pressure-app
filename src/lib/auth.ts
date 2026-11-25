@@ -2,8 +2,9 @@ import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { admin } from "better-auth/plugins";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
@@ -38,22 +39,30 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 30, // 30 days
     updateAge: 60 * 60 * 24,
   },
-  plugins: [nextCookies()],
+  // nextCookies must stay last so it can set cookies from server actions.
+  plugins: [admin({ defaultRole: "user", adminRoles: ["admin"] }), nextCookies()],
 });
 
-export type CurrentUser = { id: string; name: string; email: string };
+export type CurrentUser = { id: string; name: string; email: string; isAdmin: boolean };
 
 /** Signed-in user or null. Deduplicated per request via React.cache(). */
 export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const result = await auth.api.getSession({ headers: await headers() });
   if (!result) return null;
-  const { id, name, email } = result.user;
-  return { id, name, email };
+  const { id, name, email, role } = result.user;
+  return { id, name, email, isAdmin: role === "admin" };
 });
 
 /** Signed-in user, or redirect to /sign-in. Call inside a Suspense boundary. */
 export async function requireUser(): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
+  return user;
+}
+
+/** Signed-in admin, or 404 so the admin area isn't advertised to other users. */
+export async function requireAdmin(): Promise<CurrentUser> {
+  const user = await requireUser();
+  if (!user.isAdmin) notFound();
   return user;
 }

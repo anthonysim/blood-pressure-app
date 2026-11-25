@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOutIcon } from "lucide-react";
+import { LogOutIcon, UsersIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import {
@@ -14,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/lib/auth-client";
 
-export function UserMenu({ name, email }: { name: string; email: string }) {
+export function UserMenu({ name, email, isAdmin }: { name: string; email: string; isAdmin: boolean }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const initial = name.trim().charAt(0).toUpperCase() || "?";
@@ -43,6 +44,15 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
+        {isAdmin ? (
+          <>
+            <DropdownMenuItem render={<Link href="/admin" />}>
+              <UsersIcon aria-hidden />
+              Manage users
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        ) : null}
         <DropdownMenuItem onClick={handleSignOut} disabled={isPending}>
           <LogOutIcon aria-hidden />
           {isPending ? "Signing out…" : "Sign out"}
