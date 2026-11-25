@@ -112,6 +112,7 @@ async function Dashboard() {
 
       <CollapsibleBpCategories
         highlight={classify(latest.systolic, latest.diastolic)}
+        latestReading={`${latest.systolic}/${latest.diastolic}`}
         description="Where your latest reading falls (AHA guideline)"
       />
     </div>

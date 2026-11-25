@@ -24,27 +24,58 @@ const FULL_LABEL: Record<Category, string> = {
   crisis: "Hypertensive crisis",
 };
 
+const ACTIVE_ROW_STYLE: Record<Category, string> = {
+  normal: "bg-emerald-200 text-emerald-950 dark:bg-emerald-900 dark:text-emerald-100",
+  elevated: "bg-yellow-200 text-yellow-950 dark:bg-yellow-900 dark:text-yellow-100",
+  stage1: "bg-orange-200 text-orange-950 dark:bg-orange-900 dark:text-orange-100",
+  stage2: "bg-red-200 text-red-950 dark:bg-red-900 dark:text-red-100",
+  crisis: "bg-red-700 text-white dark:bg-red-600",
+};
+
+function LatestBadge({ category, reading }: { category: Category; reading?: string }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold tracking-tight whitespace-nowrap tabular-nums",
+        category === "crisis"
+          ? "bg-white text-red-700"
+          : "bg-card text-current ring-1 ring-current/20",
+      )}
+    >
+      Your latest{reading ? ` · ${reading}` : ""}
+    </span>
+  );
+}
+
 /** The AHA blood pressure categories table. `highlight` marks the row for the user's latest reading. */
-export function BpCategoryChart({ highlight }: { highlight?: Category }) {
+export function BpCategoryChart({
+  highlight,
+  latestReading,
+}: {
+  highlight?: Category;
+  latestReading?: string;
+}) {
   return (
     <div>
       {/* Mobile stacked cards (< sm): no horizontal scrolling */}
       <div className="grid gap-2 sm:hidden">
         {ROWS.map((row) => {
           const active = row.category === highlight;
+          const dimmed = Boolean(highlight && !active);
           return (
             <div
               key={row.category}
               aria-current={active ? "true" : undefined}
               className={cn(
-                "grid gap-1 rounded-lg px-3 py-2.5 text-sm",
-                CATEGORY_INFO[row.category].className,
-                active && "outline-2 outline-offset-1 outline-foreground",
+                "grid gap-1 rounded-lg px-3 py-2.5 text-sm transition-opacity",
+                active ? ACTIVE_ROW_STYLE[row.category] : CATEGORY_INFO[row.category].className,
+                active && "shadow-xs",
+                dimmed && "opacity-55 hover:opacity-100",
               )}
             >
-              <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+              <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
                 <span className="font-semibold">{FULL_LABEL[row.category]}</span>
-                {active ? <span className="text-xs font-medium">← Your latest</span> : null}
+                {active ? <LatestBadge category={row.category} reading={latestReading} /> : null}
               </div>
               {row.note ? <div className="text-xs">{row.note}</div> : null}
               <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs tabular-nums">
@@ -76,22 +107,29 @@ export function BpCategoryChart({ highlight }: { highlight?: Category }) {
           <tbody>
             {ROWS.map((row) => {
               const active = row.category === highlight;
+              const dimmed = Boolean(highlight && !active);
               return (
                 <tr
                   key={row.category}
                   aria-current={active ? "true" : undefined}
-                  className={cn(CATEGORY_INFO[row.category].className, active && "outline-2 outline-offset-1 outline-foreground")}
+                  className={cn(
+                    "transition-opacity",
+                    active ? ACTIVE_ROW_STYLE[row.category] : CATEGORY_INFO[row.category].className,
+                    dimmed && "opacity-55 hover:opacity-100",
+                  )}
                 >
                   <th scope="row" className="rounded-l-lg px-3 py-2.5 text-left font-semibold">
-                    {FULL_LABEL[row.category]}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span>{FULL_LABEL[row.category]}</span>
+                      {active ? <LatestBadge category={row.category} reading={latestReading} /> : null}
+                    </div>
                     {row.note ? <div className="text-xs font-normal">{row.note}</div> : null}
-                    {active ? (
-                      <div className="mt-0.5 text-xs font-medium">← Your latest reading</div>
-                    ) : null}
                   </th>
-                  <td className="px-3 py-2.5 tabular-nums">{row.systolic}</td>
+                  <td className={cn("px-3 py-2.5 tabular-nums", active && "font-medium")}>{row.systolic}</td>
                   <td className="py-2.5 text-center text-xs font-semibold uppercase">{row.joiner}</td>
-                  <td className="rounded-r-lg px-3 py-2.5 tabular-nums">{row.diastolic}</td>
+                  <td className={cn("rounded-r-lg px-3 py-2.5 tabular-nums", active && "font-medium")}>
+                    {row.diastolic}
+                  </td>
                 </tr>
               );
             })}
@@ -110,10 +148,12 @@ export function BpCategoryChart({ highlight }: { highlight?: Category }) {
 /** Compact collapsible AHA reference card so it doesn't dominate vertical space. */
 export function CollapsibleBpCategories({
   highlight,
+  latestReading,
   description = "American Heart Association guideline",
   defaultOpen = false,
 }: {
   highlight?: Category;
+  latestReading?: string;
   description?: string;
   defaultOpen?: boolean;
 }) {
@@ -145,7 +185,7 @@ export function CollapsibleBpCategories({
         </div>
       </summary>
       <div className="border-t px-4 pt-3 pb-4 sm:px-5">
-        <BpCategoryChart highlight={highlight} />
+        <BpCategoryChart highlight={highlight} latestReading={latestReading} />
       </div>
     </details>
   );
