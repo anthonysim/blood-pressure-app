@@ -16,7 +16,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-export function DeleteReadingButton({ id, summary }: { id: string; summary?: string }) {
+export function DeleteReadingButton({
+  id,
+  summary,
+  size = "icon-sm",
+}: {
+  id: string;
+  summary?: string;
+  size?: "icon" | "icon-sm";
+}) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -36,7 +44,7 @@ export function DeleteReadingButton({ id, summary }: { id: string; summary?: str
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button variant="ghost" size="icon-sm" disabled={isPending} aria-label="Delete reading" />
+          <Button variant="ghost" size={size} disabled={isPending} aria-label="Delete reading" />
         }
       >
         <Trash2Icon />

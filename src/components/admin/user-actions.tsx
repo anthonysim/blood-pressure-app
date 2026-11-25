@@ -35,7 +35,7 @@ type Target = { id: string; name: string; email: string; banned: boolean };
 type Mode = "reset" | "ban" | "delete" | null;
 
 /** Row menu: reset password, ban/unban, delete. Each destructive step confirms in a dialog. */
-export function UserActions({ user }: { user: Target }) {
+export function UserActions({ user, size = "icon-sm" }: { user: Target; size?: "icon" | "icon-sm" }) {
   const [mode, setMode] = useState<Mode>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -55,7 +55,7 @@ export function UserActions({ user }: { user: Target }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger
-          render={<Button variant="ghost" size="icon-sm" aria-label={`Actions for ${user.email}`} disabled={isPending} />}
+          render={<Button variant="ghost" size={size} aria-label={`Actions for ${user.email}`} disabled={isPending} />}
         >
           <MoreHorizontalIcon />
         </DropdownMenuTrigger>

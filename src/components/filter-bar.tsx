@@ -123,7 +123,7 @@ export function FilterBar({ basePath, filters }: Props) {
     <div className="no-print grid gap-3 rounded-xl border bg-card p-3 sm:p-4" role="search" aria-label="Filter readings">
       <div className="flex flex-wrap items-center gap-2">
         <div
-          className="inline-flex flex-wrap rounded-lg border bg-background/60 p-0.5"
+          className="grid w-full grid-cols-3 rounded-lg border bg-background/60 p-0.5 sm:inline-flex sm:w-auto sm:flex-wrap"
           role="radiogroup"
           aria-label="Date range"
         >
@@ -135,7 +135,7 @@ export function FilterBar({ basePath, filters }: Props) {
               aria-checked={draft.range === r}
               onClick={() => update({ range: r })}
               className={cn(
-                "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors sm:py-1",
                 draft.range === r
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -146,7 +146,7 @@ export function FilterBar({ basePath, filters }: Props) {
           ))}
         </div>
 
-        <div className="relative min-w-44 flex-1 sm:max-w-60">
+        <div className="relative min-w-0 flex-1 sm:min-w-44 sm:max-w-60">
           <SearchIcon
             className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
             aria-hidden
@@ -160,7 +160,7 @@ export function FilterBar({ basePath, filters }: Props) {
             }}
             placeholder="Search notes…"
             aria-label="Search notes"
-            className="h-8 pl-8 text-xs"
+            className="h-9 pl-8 text-base md:h-8 md:text-xs"
           />
         </div>
 
@@ -170,6 +170,7 @@ export function FilterBar({ basePath, filters }: Props) {
           size="sm"
           onClick={() => setShowMore((v) => !v)}
           aria-expanded={showMore}
+          className="h-9 md:h-8"
         >
           <SlidersHorizontalIcon aria-hidden />
           Filters
@@ -190,7 +191,7 @@ export function FilterBar({ basePath, filters }: Props) {
             ) : null}
           </span>
           {active ? (
-            <Link href={basePath} replace scroll={false} className={buttonVariants({ variant: "ghost", size: "sm" })}>
+            <Link href={basePath} replace scroll={false} className={buttonVariants({ variant: "ghost", size: "sm", className: "h-9 md:h-8" })}>
               <XIcon aria-hidden />
               Reset
             </Link>
@@ -199,7 +200,7 @@ export function FilterBar({ basePath, filters }: Props) {
       </div>
 
       {draft.range === "custom" ? (
-        <div className="flex flex-wrap items-end gap-3 border-t pt-3">
+        <div className="grid grid-cols-1 gap-3 border-t pt-3 sm:flex sm:flex-wrap sm:items-end">
           <div className="grid gap-1">
             <Label htmlFor="from" className="text-xs">
               From
@@ -210,7 +211,7 @@ export function FilterBar({ basePath, filters }: Props) {
               value={draft.from}
               max={draft.to || undefined}
               onChange={(e) => update({ from: e.target.value })}
-              className="w-fit"
+              className="w-full sm:w-fit"
             />
           </div>
           <div className="grid gap-1">
@@ -223,7 +224,7 @@ export function FilterBar({ basePath, filters }: Props) {
               value={draft.to}
               min={draft.from || undefined}
               onChange={(e) => update({ to: e.target.value })}
-              className="w-fit"
+              className="w-full sm:w-fit"
             />
           </div>
         </div>
@@ -290,11 +291,11 @@ function BoundInputs(props: {
         if (e.key === "Enter") props.onCommit();
       }}
       aria-label={`${props.label} ${placeholder}imum`}
-      className="h-8 w-20 text-xs"
+      className="h-9 w-full text-base sm:w-20 md:h-8 md:text-xs"
     />
   );
   return (
-    <fieldset className="grid gap-1">
+    <fieldset className="grid flex-1 gap-1 sm:flex-none">
       <legend className="mb-1 text-xs font-medium text-muted-foreground">{props.label} (mmHg)</legend>
       <div className="flex items-center gap-1.5">
         {field(props.minKey, "min")}
@@ -327,7 +328,7 @@ function ChipGroup(props: {
             aria-checked={checked}
             onClick={() => props.onToggle(o.value)}
             className={cn(
-              "rounded-full border px-2.5 py-1 text-xs transition-colors select-none",
+              "rounded-full border px-3 py-1.5 text-xs transition-colors select-none sm:px-2.5 sm:py-1",
               "focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
               checked ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted",
             )}

@@ -12,7 +12,7 @@ export function ListPageSkeleton() {
   return (
     <div className="grid gap-4" role="status" aria-label="Loading">
       <FilterBarSkeleton />
-      <Block className="h-7 w-72" />
+      <Block className="h-7 w-full max-w-72" />
       <Block className="h-4 w-24" />
       <div className="grid gap-px overflow-hidden rounded-xl border bg-border">
         {Array.from({ length: 8 }, (_, i) => (
@@ -27,7 +27,7 @@ export function TrendsSkeleton() {
   return (
     <div className="grid gap-4" role="status" aria-label="Loading">
       <FilterBarSkeleton />
-      <Block className="h-7 w-72" />
+      <Block className="h-7 w-full max-w-72" />
       <Block className="h-[470px]" />
       <div className="grid gap-4 lg:grid-cols-2">
         <Block className="h-[380px]" />

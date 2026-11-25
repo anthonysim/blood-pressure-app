@@ -61,7 +61,7 @@ function SavedChip({ basePath, search, active }: { basePath: string; search: Sav
         isPending && "opacity-50",
       )}
     >
-      <Link href={href} className="py-1 pr-1 pl-2.5 hover:underline">
+      <Link href={href} className="py-1.5 pr-1 pl-3 hover:underline sm:py-1 sm:pl-2.5">
         {search.name}
       </Link>
       <button
@@ -69,7 +69,7 @@ function SavedChip({ basePath, search, active }: { basePath: string; search: Sav
         onClick={handleDelete}
         disabled={isPending}
         aria-label={`Delete saved search ${search.name}`}
-        className="rounded-full p-1 text-muted-foreground hover:text-foreground"
+        className="rounded-full p-1.5 text-muted-foreground hover:text-foreground sm:p-1"
       >
         <XIcon className="size-3" />
       </button>

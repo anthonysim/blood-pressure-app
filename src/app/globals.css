@@ -145,9 +145,17 @@
 
 /* ---------- Smooth navigation ---------- */
 
-/* Reserve scrollbar space so pages of different heights don't shift sideways. */
-html {
-  scrollbar-gutter: stable;
+/* Reserve scrollbar space on desktop so pages of different heights don't shift sideways. */
+@media (min-width: 768px) {
+  html {
+    scrollbar-gutter: stable;
+  }
+}
+
+/* Touch polish for iOS/iPadOS Safari */
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
 }
 
 :root {

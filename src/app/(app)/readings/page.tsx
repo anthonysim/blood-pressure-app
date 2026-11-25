@@ -93,29 +93,29 @@ type Row = Awaited<ReturnType<typeof getReadings>>["rows"][number];
 
 function ReadingsMobileList({ rows, tz }: { rows: Row[]; tz: string }) {
   return (
-    <div className="grid gap-2.5 md:hidden">
+    <div className="grid gap-2.5 sm:grid-cols-2 lg:hidden">
       {rows.map((r) => {
         const dateLabel = formatInZone(r.measuredAt, "EEE, MMM d, yyyy", tz);
         const timeLabel = formatInZone(r.measuredAt, "h:mm a", tz);
         return (
-          <div key={r.id} className="grid gap-2 rounded-xl border bg-card p-3.5">
+          <div key={r.id} className="grid content-start gap-2 rounded-xl border bg-card p-3.5">
             <div className="flex items-start justify-between gap-2">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <span className="text-lg font-semibold tabular-nums">
                   {r.systolic}/{r.diastolic}
                 </span>
                 <span className="text-xs text-muted-foreground">mmHg</span>
                 <CategoryBadge systolic={r.systolic} diastolic={r.diastolic} />
               </div>
-              <div className="no-print flex items-center">
+              <div className="no-print flex shrink-0 items-center gap-0.5">
                 <Link
                   href={`/readings/${r.id}/edit`}
                   aria-label="Edit reading"
-                  className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
+                  className={buttonVariants({ variant: "ghost", size: "icon" })}
                 >
                   <PencilIcon />
                 </Link>
-                <DeleteReadingButton id={r.id} summary={`${r.systolic}/${r.diastolic} (${dateLabel})`} />
+                <DeleteReadingButton id={r.id} summary={`${r.systolic}/${r.diastolic} (${dateLabel})`} size="icon" />
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
@@ -141,7 +141,7 @@ function ReadingsMobileList({ rows, tz }: { rows: Row[]; tz: string }) {
 
 function ReadingsTable({ rows, tz }: { rows: Row[]; tz: string }) {
   return (
-    <div className="hidden overflow-hidden rounded-xl border bg-card md:block">
+    <div className="hidden overflow-hidden rounded-xl border bg-card lg:block">
       <Table>
         <TableHeader>
           <TableRow>
@@ -204,28 +204,28 @@ function Pagination({ page, totalPages, query }: { page: number; totalPages: num
       </span>
       <div className="flex items-center gap-2">
         {page > 1 ? (
-          <Link href={pageHref(query, page - 1)} className={buttonVariants({ variant: "outline", size: "sm" })}>
+          <Link href={pageHref(query, page - 1)} className={buttonVariants({ variant: "outline", size: "sm", className: "h-9 px-3 sm:h-7 sm:px-2.5" })}>
             <ChevronLeftIcon aria-hidden />
             Previous
           </Link>
         ) : (
           <span
             aria-disabled="true"
-            className={buttonVariants({ variant: "outline", size: "sm", className: "pointer-events-none opacity-50" })}
+            className={buttonVariants({ variant: "outline", size: "sm", className: "pointer-events-none h-9 px-3 opacity-50 sm:h-7 sm:px-2.5" })}
           >
             <ChevronLeftIcon aria-hidden />
             Previous
           </span>
         )}
         {page < totalPages ? (
-          <Link href={pageHref(query, page + 1)} className={buttonVariants({ variant: "outline", size: "sm" })}>
+          <Link href={pageHref(query, page + 1)} className={buttonVariants({ variant: "outline", size: "sm", className: "h-9 px-3 sm:h-7 sm:px-2.5" })}>
             Next
             <ChevronRightIcon aria-hidden />
           </Link>
         ) : (
           <span
             aria-disabled="true"
-            className={buttonVariants({ variant: "outline", size: "sm", className: "pointer-events-none opacity-50" })}
+            className={buttonVariants({ variant: "outline", size: "sm", className: "pointer-events-none h-9 px-3 opacity-50 sm:h-7 sm:px-2.5" })}
           >
             Next
             <ChevronRightIcon aria-hidden />

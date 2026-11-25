@@ -56,9 +56,17 @@ export function QuickAddReadingDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={<Button variant={variant} size={size} />}>
+      <DialogTrigger
+        render={
+          <Button
+            variant={variant}
+            size={size}
+            className={compactTrigger ? "h-8 px-2.5 sm:h-7" : undefined}
+          />
+        }
+      >
         <PlusIcon aria-hidden />
-        <span className={compactTrigger ? "hidden sm:inline" : undefined}>{triggerLabel}</span>
+        <span className={compactTrigger ? "sr-only sm:not-sr-only" : undefined}>{triggerLabel}</span>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
