@@ -27,8 +27,8 @@ export function NavLinksView({ pathname }: { pathname?: string }) {
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors hover:text-foreground",
-              active && "bg-muted font-medium text-foreground",
+              "rounded-md px-2.5 py-1.5 font-medium text-muted-foreground transition-colors hover:text-foreground",
+              active && "bg-muted text-foreground",
             )}
           >
             {label}

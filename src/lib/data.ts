@@ -1,14 +1,17 @@
 import "server-only";
-import { and, avg, count, desc, eq, gte, inArray, lt, lte, or, sql, type SQL } from "drizzle-orm";
+import { TZDate } from "@date-fns/tz";
+import { startOfDay } from "date-fns";
+import { and, avg, count, desc, eq, gte, ilike, inArray, lt, lte, max, min, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { reading, savedSearch } from "@/db/schema";
 import { requireUser } from "./auth";
-import { PERIODS, type Category } from "./bp";
+import { PERIODS, type Category, type Period } from "./bp";
 import type { DailyPoint, PeriodAverage } from "./chart-types";
 import { dateBounds, getTimeZone } from "./dates";
 import type { Filters } from "./filters";
 
-const MAX_ROWS = 1000;
+export const PAGE_SIZE = 50;
+const EXPORT_MAX_ROWS = 5000;
 
 const CATEGORY_SQL: Record<Category, SQL> = {
   crisis: sql`(${reading.systolic} > 180 or ${reading.diastolic} > 120)`,
@@ -17,6 +20,10 @@ const CATEGORY_SQL: Record<Category, SQL> = {
   elevated: sql`(${reading.systolic} between 120 and 129 and ${reading.diastolic} < 80)`,
   normal: sql`(${reading.systolic} < 120 and ${reading.diastolic} < 80)`,
 };
+
+function escapeLike(value: string): string {
+  return value.replace(/[%_\\]/g, "\\$&");
+}
 
 function buildWhere(userId: string, filters: Filters, tz: string, now: Date): SQL | undefined {
   const { start, end } = dateBounds(filters, tz, now);
@@ -30,6 +37,7 @@ function buildWhere(userId: string, filters: Filters, tz: string, now: Date): SQ
     filters.sysMax !== undefined ? lte(reading.systolic, filters.sysMax) : undefined,
     filters.diaMin !== undefined ? gte(reading.diastolic, filters.diaMin) : undefined,
     filters.diaMax !== undefined ? lte(reading.diastolic, filters.diaMax) : undefined,
+    filters.q ? ilike(reading.notes, `%${escapeLike(filters.q)}%`) : undefined,
   );
 }
 
@@ -42,11 +50,41 @@ const round = (v: string | number | null) => (v === null ? null : Math.round(Num
 
 /* ---------- Readings list ---------- */
 
-export async function getReadings(filters: Filters) {
+export async function getReadings(filters: Filters, page = 1) {
   const { user, tz, now } = await context();
+  const where = buildWhere(user.id, filters, tz, now);
+  const safePage = Math.max(1, Math.floor(page));
+
+  const [[totalRow], rows] = await Promise.all([
+    db.select({ total: count() }).from(reading).where(where),
+    db
+      .select({
+        id: reading.id,
+        systolic: reading.systolic,
+        diastolic: reading.diastolic,
+        pulse: reading.pulse,
+        period: reading.period,
+        measuredAt: reading.measuredAt,
+        notes: reading.notes,
+      })
+      .from(reading)
+      .where(where)
+      .orderBy(desc(reading.measuredAt))
+      .limit(PAGE_SIZE)
+      .offset((safePage - 1) * PAGE_SIZE),
+  ]);
+
+  const totalCount = totalRow?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  return { rows, totalCount, page: Math.min(safePage, totalPages), totalPages, tz };
+}
+
+export async function getReadingsForExport(filters: Filters) {
+  const { user, tz, now } = await context();
+  const where = buildWhere(user.id, filters, tz, now);
   const rows = await db
     .select({
-      id: reading.id,
       systolic: reading.systolic,
       diastolic: reading.diastolic,
       pulse: reading.pulse,
@@ -55,11 +93,11 @@ export async function getReadings(filters: Filters) {
       notes: reading.notes,
     })
     .from(reading)
-    .where(buildWhere(user.id, filters, tz, now))
+    .where(where)
     .orderBy(desc(reading.measuredAt))
-    .limit(MAX_ROWS + 1);
+    .limit(EXPORT_MAX_ROWS);
 
-  return { rows: rows.slice(0, MAX_ROWS), truncated: rows.length > MAX_ROWS, tz };
+  return { rows, tz };
 }
 
 export async function getReading(id: string) {
@@ -74,7 +112,6 @@ export async function getReading(id: string) {
 
 /* ---------- Aggregates for charts ---------- */
 
-
 async function dailySeries(where: SQL | undefined, tz: string): Promise<DailyPoint[]> {
   const day = sql<string>`to_char(${reading.measuredAt} at time zone ${tz}, 'YYYY-MM-DD')`;
   const rows = await db
@@ -82,6 +119,10 @@ async function dailySeries(where: SQL | undefined, tz: string): Promise<DailyPoi
       date: day,
       systolic: avg(reading.systolic),
       diastolic: avg(reading.diastolic),
+      sysMin: min(reading.systolic),
+      sysMax: max(reading.systolic),
+      diaMin: min(reading.diastolic),
+      diaMax: max(reading.diastolic),
       pulse: avg(reading.pulse),
       count: count(),
     })
@@ -95,6 +136,10 @@ async function dailySeries(where: SQL | undefined, tz: string): Promise<DailyPoi
     date: r.date,
     systolic: round(r.systolic)!,
     diastolic: round(r.diastolic)!,
+    sysMin: Number(r.sysMin),
+    sysMax: Number(r.sysMax),
+    diaMin: Number(r.diaMin),
+    diaMax: Number(r.diaMax),
     pulse: round(r.pulse),
     count: r.count,
   }));
@@ -135,12 +180,21 @@ export async function getTrends(filters: Filters) {
 
 /* ---------- Dashboard ---------- */
 
+export type TodayReading = {
+  period: Period;
+  systolic: number;
+  diastolic: number;
+  pulse: number | null;
+  measuredAt: Date;
+};
+
 export async function getDashboard() {
   const { user, tz, now } = await context();
   const base = (range: Filters["range"]) =>
     buildWhere(user.id, { range, period: [], category: [] }, tz, now);
+  const todayStart = startOfDay(new TZDate(now, tz));
 
-  const [latestRows, last7, last30, daily30] = await Promise.all([
+  const [latestRows, todayRows, last7, last30, daily30] = await Promise.all([
     db
       .select({
         systolic: reading.systolic,
@@ -153,12 +207,28 @@ export async function getDashboard() {
       .where(eq(reading.userId, user.id))
       .orderBy(desc(reading.measuredAt))
       .limit(1),
+    db
+      .select({
+        period: reading.period,
+        systolic: reading.systolic,
+        diastolic: reading.diastolic,
+        pulse: reading.pulse,
+        measuredAt: reading.measuredAt,
+      })
+      .from(reading)
+      .where(and(eq(reading.userId, user.id), gte(reading.measuredAt, todayStart)))
+      .orderBy(desc(reading.measuredAt)),
     periodAverages(base("7d")),
     periodAverages(base("30d")),
     dailySeries(base("30d"), tz),
   ]);
 
-  return { latest: latestRows[0] ?? null, last7, last30, daily30, tz, name: user.name };
+  const todayByPeriod: Partial<Record<Period, TodayReading>> = {};
+  for (const r of todayRows) {
+    if (!todayByPeriod[r.period]) todayByPeriod[r.period] = r;
+  }
+
+  return { latest: latestRows[0] ?? null, todayByPeriod, last7, last30, daily30, tz, name: user.name };
 }
 
 /* ---------- Saved searches ---------- */

@@ -11,6 +11,7 @@ import { PERIODS } from "@/lib/bp";
 import { getTimeZone, parseLocalDateTime } from "@/lib/dates";
 
 export type ReadingFormState = {
+  ok?: boolean;
   error?: string;
   fieldErrors?: Partial<Record<"systolic" | "diastolic" | "pulse" | "period" | "measuredAt" | "notes", string[]>>;
 };
@@ -59,6 +60,7 @@ export async function createReading(_prev: ReadingFormState, formData: FormData)
 
   await db.insert(reading).values({ ...result.values, userId: user.id });
   revalidatePath("/", "layout");
+  if (formData.get("noRedirect") === "1") return { ok: true };
   redirect("/readings");
 }
 

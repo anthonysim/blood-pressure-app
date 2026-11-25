@@ -17,14 +17,19 @@ describe("parseFilters", () => {
     expect(f).toEqual({ range: "30d", period: [], category: [], sysMin: undefined, from: undefined });
   });
 
-  it("coerces numeric bounds", () => {
-    expect(parseFilters({ sysMin: "130", diaMax: "90" })).toMatchObject({ sysMin: 130, diaMax: 90 });
+  it("coerces numeric bounds and trims notes query", () => {
+    expect(parseFilters({ sysMin: "130", diaMax: "90", q: "  coffee  " })).toMatchObject({
+      sysMin: 130,
+      diaMax: 90,
+      q: "coffee",
+    });
+    expect(parseFilters({ q: "   " }).q).toBeUndefined();
   });
 });
 
 describe("serializeFilters", () => {
   it("round-trips and omits defaults", () => {
-    const query = "range=custom&from=2026-11-01&to=2026-11-24&period=morning&sysMin=130";
+    const query = "range=custom&from=2026-11-01&to=2026-11-24&period=morning&sysMin=130&q=coffee";
     expect(serializeFilters(parseFilters(new URLSearchParams(query)))).toBe(query);
     expect(serializeFilters(parseFilters({}))).toBe("");
   });

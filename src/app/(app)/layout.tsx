@@ -1,10 +1,10 @@
-import { HeartPulseIcon, PlusIcon } from "lucide-react";
+import { HeartPulseIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { NavLinks, NavLinksView } from "@/components/nav-links";
+import { QuickAddReadingDialog } from "@/components/quick-add-reading-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TimezoneSync } from "@/components/timezone-sync";
-import { buttonVariants } from "@/components/ui/button";
 import { UserMenu } from "@/components/user-menu";
 import { requireUser } from "@/lib/auth";
 
@@ -21,10 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavLinks />
           </Suspense>
           <div className="ml-auto flex items-center gap-2">
-            <Link href="/readings/new" className={buttonVariants({ size: "sm" })}>
-              <PlusIcon aria-hidden />
-              <span className="hidden sm:inline">Add reading</span>
-            </Link>
+            <QuickAddReadingDialog compactTrigger />
             <ThemeToggle />
             <Suspense fallback={<div className="size-8 rounded-full bg-muted" />}>
               <CurrentUserMenu />

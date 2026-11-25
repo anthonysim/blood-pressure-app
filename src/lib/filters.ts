@@ -27,6 +27,13 @@ const filtersSchema = z.object({
   sysMax: bound.optional().catch(undefined),
   diaMin: bound.optional().catch(undefined),
   diaMax: bound.optional().catch(undefined),
+  q: z
+    .string()
+    .trim()
+    .max(100)
+    .transform((v) => (v === "" ? undefined : v))
+    .optional()
+    .catch(undefined),
 });
 
 export type Filters = z.infer<typeof filtersSchema>;
@@ -67,6 +74,7 @@ export function serializeFilters(filters: Filters): string {
     const v = filters[key];
     if (v !== undefined) sp.set(key, String(v));
   }
+  if (filters.q) sp.set("q", filters.q);
   return sp.toString();
 }
 
