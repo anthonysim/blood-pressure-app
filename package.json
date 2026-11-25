@@ -14,7 +14,8 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose stop",
-    "db:reset": "docker compose down -v && docker compose up -d --wait && drizzle-kit migrate"
+    "db:reset": "docker compose down -v && docker compose up -d --wait && drizzle-kit migrate",
+    "admin:grant": "tsx scripts/grant-admin.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

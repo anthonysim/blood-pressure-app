@@ -37,5 +37,5 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
 async function CurrentUserMenu() {
   const user = await requireUser();
-  return <UserMenu name={user.name} email={user.email} />;
+  return <UserMenu name={user.name} email={user.email} isAdmin={user.isAdmin} />;
 }
