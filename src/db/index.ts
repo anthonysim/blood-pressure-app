@@ -1,3 +1,4 @@
+import { attachDatabasePool } from "@vercel/functions";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./schema";
@@ -8,7 +9,12 @@ if (!process.env.DATABASE_URL) {
 
 // Reuse one pool across hot reloads in dev so connections don't pile up.
 const globalForDb = globalThis as unknown as { pgPool?: Pool };
-const pool = globalForDb.pgPool ?? new Pool({ connectionString: process.env.DATABASE_URL, max: 10 });
+const pool =
+  globalForDb.pgPool ??
+  new Pool({ connectionString: process.env.DATABASE_URL, max: 10, idleTimeoutMillis: 5_000 });
 if (process.env.NODE_ENV !== "production") globalForDb.pgPool = pool;
+
+// On Vercel Fluid Compute, closes idle clients before an instance is suspended so connections don't leak.
+attachDatabasePool(pool);
 
 export const db = drizzle(pool, { schema });

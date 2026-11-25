@@ -8,7 +8,18 @@ import { cache } from "react";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
+const vercelOrigins = [
+  process.env.VERCEL_URL, // this deployment's unique URL
+  process.env.VERCEL_BRANCH_URL, // stable per-branch preview URL
+  process.env.VERCEL_PROJECT_PRODUCTION_URL, // e.g. <project>.vercel.app
+]
+  .filter(Boolean)
+  .map((host) => `https://${host}`);
+
 export const auth = betterAuth({
+  // Production sets BETTER_AUTH_URL; previews fall back to their own Vercel URL.
+  baseURL: process.env.BETTER_AUTH_URL ?? vercelOrigins[0],
+  trustedOrigins: vercelOrigins,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
