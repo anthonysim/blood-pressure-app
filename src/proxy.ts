@@ -1,7 +1,7 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
-const AUTH_PAGES = ["/sign-in", "/sign-up"];
+const AUTH_PAGES = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password"];
 
 // Optimistic check only (cookie presence). Real session validation happens in requireUser().
 export function proxy(request: NextRequest) {
