@@ -1,4 +1,5 @@
 import "server-only";
+import { waitUntil } from "@vercel/functions";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
@@ -8,6 +9,7 @@ import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
+import { passwordResetEmail, sendEmail } from "./email";
 
 const vercelOrigins = [
   process.env.VERCEL_URL, // this deployment's unique URL
@@ -34,6 +36,15 @@ export const auth = betterAuth({
     enabled: true,
     minPasswordLength: 8,
     autoSignIn: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({ to: user.email, ...passwordResetEmail({ name: user.name, url }) });
+    },
+    resetPasswordTokenExpiresIn: 60 * 60, // 1 hour
+    revokeSessionsOnPasswordReset: true,
+  },
+  advanced: {
+    // Send emails after responding, so "reset password" answers equally fast whether or not the account exists.
+    backgroundTasks: { handler: waitUntil },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 30, // 30 days
